@@ -98,10 +98,45 @@ public class BinaryTree
 
     public string ToMermaid() //Returns a Mermaid graph TD definition string representing the tree structure (see format below).
     {
+        int links;
         if (this.Root == null)
         {
             return "graph TD\n empty[\"(empty tree)\"]";
         }
-        return null;
+        else
+        {
+            return $"graph TD; \n {ToMermaidRecursively(Root, ref links)}"
+        }
+    }
+
+    private string ToMermaidRecursively(Node Current, ref links)
+    {
+        string result = string.Empty;
+        if (Current.left != null)
+        {
+            result += $"{Current.Value} --> {Current.Left.Value} \n"; //result += $"{Current.Value} --> {Current.Left.Value}[{Current.Left.Value} h:{{Current.Left.Height} d:{{Current.Left.Depth}}] \n";
+            links++;
+            result += ToMermaidRecursively(Current.Left, link);
+        }
+        else 
+        {
+            result += $"{Current.Value} --> _phr{Current.Value}[ ] \n";
+            result += $"linkStyle {links} stroke:none,stroke-width:0,fill:none \n"
+            result += $"style _phr{Current.Value} fill:none,stroke:none,color:none \n"
+            links++;
+        }
+        if (Current.Right != null)
+        {
+            result += $"{Current.Value} --> {Current.Right.Value} \n";
+            links++;
+            result += ToMermaidRecursively(Current.Left, link);
+        }
+        else
+        {
+            result += $"{Current.Value} --> _phr{Current.Value}[ ] \n";
+            result += $"linkStyle {links} stroke:none,stroke-width:0,fill:none \n"
+            result += $"style _phr{Current.Value} fill:none,stroke:none,color:none \n"
+            links++;
+        }
     }
 }
