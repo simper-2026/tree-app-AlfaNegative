@@ -17,9 +17,10 @@ public class BinaryTree
         {
             InsertRecursively(Root, value);
         }
+        Height();
     }
 
-    private void InsertRecursively(Node Current, int value)
+    private void InsertRecursively(Node? Current, int value)
     {
         if (value > Current.Value)
         {
@@ -43,6 +44,7 @@ public class BinaryTree
                 InsertRecursively(Current.Left, value);
             }
         }
+        Height();
     }
 
     public string InOrder() // Returns all values as a space-separated string in ascending order.
@@ -76,7 +78,8 @@ public class BinaryTree
     {
         if (this.Root != null)
         {
-            return HeightRecursively(Root);
+            Root = HeightRecursively(Root);
+            return Root.Height;
         }
         else
         {
@@ -84,16 +87,31 @@ public class BinaryTree
         }
     }
 
-    public int HeightRecursively(Node Current)
+    private Node? HeightRecursively(Node? Current)
     {
-        if (Current.Left != null)
+        if (Current == null)
+            return null;
+
+        Current.Left = HeightRecursively(Current.Left);
+        Current.Right = HeightRecursively(Current.Right);
+
+        int leftHeight = Current.Left?.Height ?? -1;
+        int rightHeight = Current.Right?.Height ?? -1;
+
+        Current.Height = Math.Max(leftHeight, rightHeight) + 1;
+
+        int balance = leftHeight - rightHeight;
+
+        if (balance > 1 && Current.Left != null)
         {
-            return HeightRecursively(Current.Left) + 1;
+            return RotateRight(Current);
         }
-        else
+        else if (balance < -1 && Current.Right != null)
         {
-            return 1;
+            return RotateLeft(Current);
         }
+
+        return Current;
     }
 
     public string ToMermaid() //Returns a Mermaid graph TD definition string representing the tree structure (see format below).
@@ -109,16 +127,16 @@ public class BinaryTree
         }
     }
 
-    private string ToMermaidRecursively(Node Current, ref int links)
+    private string ToMermaidRecursively(Node? Current, ref int links)
     {
         string result = string.Empty;
         if (Current.Left != null)
         {
-            result += $"{Current.Value} --> {Current.Left.Value} \n"; //result += $"{Current.Value} --> {Current.Left.Value}[{Current.Left.Value} h:{{Current.Left.Height} d:{{Current.Left.Depth}}] \n";
+            result += $"{Current.Value} --> {Current.Left.Value}[{Current.Left.Value} h:{Current.Left.Height}] \n"; //result += $"{Current.Value} --> {Current.Left.Value}[{Current.Left.Value} h:{{Current.Left.Height} d:{{Current.Left.Depth}}] \n";
             links++;
             result += ToMermaidRecursively(Current.Left, ref links);
         }
-        else 
+        else
         {
             result += $"{Current.Value} --> _phr{Current.Value}[ ] \n";
             result += $"linkStyle {links} stroke:none,stroke-width:0,fill:none \n";
@@ -127,7 +145,7 @@ public class BinaryTree
         }
         if (Current.Right != null)
         {
-            result += $"{Current.Value} --> {Current.Right.Value} \n";
+            result += $"{Current.Value} --> {Current.Right.Value}[{Current.Right.Value} h:{Current.Right.Height}] \n";
             links++;
             result += ToMermaidRecursively(Current.Right, ref links);
         }
@@ -139,5 +157,23 @@ public class BinaryTree
             links++;
         }
         return result;
+    }
+
+    public Node RotateRight(Node z)
+    {
+        Node y = z.Left;
+        Node t3 = y.Right;   // T3 moves from y's right to z's left
+        y.Right = z;
+        z.Left = t3;
+        return y;                // y is the new root of this subtree
+    }
+
+    public Node RotateLeft(Node z)
+    {
+        Node y = z.Right;
+        Node t2 = y.Left;
+        y.Left = z;
+        z.Right = t2;
+        return y;
     }
 }
